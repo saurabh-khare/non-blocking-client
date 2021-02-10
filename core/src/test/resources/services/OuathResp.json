@@ -1,0 +1,8 @@
+{
+    "access_token": "some-token",
+    "instance_url": "https://salesforce.com",
+    "id": "some-id",
+    "token_type": "Bearer",
+    "issued_at": "1587463839455",
+    "signature": "some-signature"
+}
