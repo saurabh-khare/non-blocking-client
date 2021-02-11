@@ -1,58 +1,37 @@
-# Sample AEM project template
+# Non blocking API client
 
-This is a project template for AEM-based applications. It is intended as a best-practice set of examples as well as a potential starting point to develop your own functionality.
+It is basically a servlet exposed as a REST endpoint via Apache Sling framework. It in turn fires multiple HTTP calls in parallel
+and caching response in memory based on OSGi configuration. It then sends a consolidated response to the invoker.
 
-## Modules
+## Features
+* Use of Service Contract pattern to define a Service Interface which should be implemented by all services
+* A service represents a third party REST API and encapsulates the logic to connect to the endpoint using its own set of configuration
+* Each service exposes a ServiceWorker which handles the request data and is called by the invoker.
+* Response is cache in-memory using Google Guava library by passing the executor function to cache
 
-The main parts of the template are:
+## Use Case
+Here the use case is for Lead Generation, where website visitors can express interest in certain products and can submit their information
+by a contact form which will be treated as Lead by the website business owners. 
+There are three steps which are necessary to generate a lead:
+1. Validate the form submission using Google Recaptcha
+2. Validate if user is entering valid email by performing verification with ZeroBounce service
+3. Obtain auth token from Authentication service by passing client ID and client secret to be sent along with form data to 
+   lead generation service
+  
+Instead of waiting for each step to complete and sending the response back to the client, we execute all three steps in parallel
+by firing simultaneous HTTP calls and after verification in step 1 & 2, we send form data along with token received in step 3. 
+Based on if submission is successful or not, we send back proper response to the client.
+We also cache the response of ZeroBounce validation since we don't want to validate the same email again and again and consume
+API calls thereby reducing billed usage of the service
 
-* core: Java bundle containing all core functionality like OSGi services, listeners or schedulers, as well as component-related Java code such as servlets or request filters.
-* ui.apps: contains the /apps (and /etc) parts of the project, ie JS&CSS clientlibs, components, templates, runmode specific configs as well as Hobbes-tests
-* ui.content: contains sample content using the components from the ui.apps
-* ui.tests: Java bundle containing JUnit tests that are executed server-side. This bundle is not to be deployed onto production.
-* ui.launcher: contains glue code that deploys the ui.tests bundle (and dependent bundles) to the server and triggers the remote JUnit execution
-* ui.frontend: an optional dedicated front-end build mechanism based on Webpack
 
 ## How to build
 
-To build all the modules run in the project root directory the following command with Maven 3:
+To build the bundle run in the project root directory the following command with Maven 3:
 
     mvn clean install
 
-If you have a running AEM instance you can build and package the whole project and deploy into AEM with
-
-    mvn clean install -PautoInstallPackage
-
-Or to deploy it to a publish instance, run
-
-    mvn clean install -PautoInstallPackagePublish
-
-Or alternatively
-
-    mvn clean install -PautoInstallPackage -Daem.port=4503
-
-Or to deploy only the bundle to the author, run
-
-    mvn clean install -PautoInstallBundle
 
 ## Testing
 
-There are three levels of testing contained in the project:
-
-* unit test in core: this show-cases classic unit testing of the code contained in the bundle. To test, execute:
-
     mvn clean test
-
-* server-side integration tests: this allows to run unit-like tests in the AEM-environment, ie on the AEM server. To test, execute:
-
-    mvn clean verify -PintegrationTests
-
-* client-side Hobbes.js tests: JavaScript-based browser-side tests that verify browser-side behavior. To test:
-
-    in the browser, open the page in 'Developer mode', open the left panel and switch to the 'Tests' tab and find the generated 'MyName Tests' and run them.
-
-## Maven settings
-
-The project comes with the auto-public repository configured. To setup the repository in your Maven settings, refer to:
-
-    http://helpx.adobe.com/experience-manager/kb/SetUpTheAdobeMavenRepository.html
