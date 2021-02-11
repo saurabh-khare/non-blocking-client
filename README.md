@@ -24,6 +24,11 @@ Based on if submission is successful or not, we send back proper response to the
 We also cache the response of ZeroBounce validation since we don't want to validate the same email again and again and consume
 API calls thereby reducing billed usage of the service
 
+## Important Classes
+* Entrypoint/Invoker: `com.myorg.core.servlets.LeadGenerationServlet`
+* Service Interface: `com.myorg.core.servlets.RestClientService<T>`
+* Cache: `com.myorg.core.servlets.ServiceCache` - buildCache method
+* Cache registry: `com.myorg.core.servlets.CacheRegistry`
 
 ## How to build
 
